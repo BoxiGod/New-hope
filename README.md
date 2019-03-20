@@ -18,4 +18,4 @@ yourPrivateKey = '' #Put in brackets yourPrivateKey
 yourAddress = '' #put in brackets yourAddress
 betBlock = 3 #instead of 3 put a number when you want to make a bet
 ```
-Then ```python3 New-Hope.py``` and bot is working now.
+Then ```python3 New-hope.py``` and bot is working now.
