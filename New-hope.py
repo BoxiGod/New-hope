@@ -88,8 +88,6 @@ def isGame(currHeight):
     global gameStart
     currRound = (int((currHeight - gameStart) / 1440))
     startRound = gameStart + (currRound * 1440)
-    #print("currRound = %d" % currRound)
-   # print("start round = %d" % startRound)
     if (currHeight <= (startRound + 1240)) and blocksToWin(currHeight) > 0:
         logger.info("Game is not over, check statements")
         return True
@@ -146,7 +144,3 @@ while True:
                 node = node3
                 main()
     time.sleep(1)
-"""
-print("Start program")
-isGame();
-"""
