@@ -18,4 +18,4 @@ yourPrivateKey = '' #Put in brackets yourPrivateKey
 yourAddress = '' #put in brackets yourAddress
 betBlock = 3 #instead of 3 put a number when you want to make a bet
 ```
-Then ```python3 NewHope.py``` and if everything is ok now. Setup a cron job to do this command ```python3 NewHope.py```
+Then ```python3 New-Hope.py``` and bot is working now.
