@@ -148,4 +148,4 @@ def start():
                 else:
                     start()
         time.sleep(0.5)
-#start()
+start()
