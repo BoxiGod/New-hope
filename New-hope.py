@@ -129,7 +129,7 @@ def main():
                 logger.info(sendData(paymId = paymId, winHeight = pw.height()+14))
                 time.sleep(0.3)
             exit()
-        if blocksToWin(currHeight) <= betBlock and currentWinner() != yourAddress:
+        if blocksToWin() <= betBlock and currentWinner() != yourAddress:
             paymId = sendWaves()
             while currentWinner() != yourAddress:
                 logger.info(sendData(paymId = paymId, winHeight = pw.height()+14))
@@ -138,7 +138,7 @@ def main():
         else:
             if currentWinner() == yourAddress:
                 logger.info("You are current potential winner")
-            logger.info('It is only %d blocks till win', blocksToWin(0))
+            logger.info('It is only %d blocks till win', blocksToWin())
     else:
         if currentWinner() == yourAddress:
             logger.info("You win!")
