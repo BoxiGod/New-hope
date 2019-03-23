@@ -26,6 +26,7 @@ betBlock = 2 #choose blocks till end when make a bet
 nodes = ['https://nodes.wavesnodes.com', 'https://api.vienna-node.eu', 'http://173.212.243.216:6869', 'http://138.197.155.74:6869']
 GameAddress = pw.Address(privateKey = 'YnuT613AHFzSX7FQQQEDpa1xy6TYjMaxbuvVKgN87n4')
 yourAccount = pw.Address(privateKey = yourPrivateKey)
+attempts = 10 * len(nodes)
 
 
 def sendData(paymId, winHeight):    #creating data to send
