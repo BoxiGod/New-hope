@@ -61,14 +61,17 @@ def withdraw():
 #Function, which returning current amount of blocks till win
 def blocksToWin():
     numNodes = 0
-    while True:
+    for attempt in range(attempts):
         try:
             dataTx = requests.get(nodes[numNodes] + '/addresses/data/3P7qcbeYEnD9B7GPHwkhNv2pmDZTiYwVDLw').json()
         except requests.exceptions.RequestException:
             logger.info("Problem with %s, going to try next one node", nodes[numNodes])
             numNodes = (numNodes + 1) % (len(nodes) - 1)
             continue
-        break
+        else:
+            break
+    else:
+        raise Exception('All attempts failed')
     for data in dataTx:
             if data['key'] == 'heightToGetMoney':
                 return data['value'] - pw.height()
@@ -76,18 +79,21 @@ def blocksToWin():
 #This function return current potential winner
 def currentWinner():
     numNodes = 0
-    while True:
+    for attempt in range(attempts):
         try:
             dataTx = requests.get(nodes[numNodes] + '/addresses/data/3P7qcbeYEnD9B7GPHwkhNv2pmDZTiYwVDLw').json()
         except requests.exceptions.RequestException:
             logger.info("Problem with %s, going to try next one node", nodes[numNodes])
             numNodes = (numNodes + 1) % (len(nodes) - 1)
             continue
-        break
+        else:
+            break
+    else:
+        raise Exception('All attempts failed')
     for data in dataTx:
             if data['key'] == 'lastPayment':
                 numNodes = 0
-                while True:
+                for attempt in range(attempts):
                     try:
                         url = nodes[numNodes] + "/transactions/info/%s" % data['value']
                         winTx = requests.get(url).json()
@@ -95,7 +101,10 @@ def currentWinner():
                         logger.info("Problem with %s, going to try next one node", nodes[numNodes])
                         numNodes = (numNodes + 1) % (len(nodes) - 1)
                         continue
-                    break
+                    else:
+                        break
+                else:
+                    raise Exception('All attempts failed')
                 return winTx['sender']
 
 def isGame(currHeight, startRound):
