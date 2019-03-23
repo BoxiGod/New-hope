@@ -86,10 +86,10 @@ def currentWinner():
         break
     for data in dataTx:
             if data['key'] == 'lastPayment':
-                url = nodes[numNodes] + "/transactions/info/%s" % data['value']
                 numNodes = 0
                 while True:
                     try:
+                        url = nodes[numNodes] + "/transactions/info/%s" % data['value']
                         winTx = requests.get(url).json()
                     except requests.exceptions.RequestException:
                         logger.info("Problem with %s, going to try next one node", nodes[numNodes])
