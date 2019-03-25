@@ -73,7 +73,7 @@ def sendWaves():
     return data['id']
 
 def withdraw():
-    yourAccount.sendWaves(recipient = pw.Address(yourAddress), amount = (GameAddress.balance() - 500000), txFee = 500000)
+    logger.info(GameAddress.sendWaves(recipient = pw.Address(yourAddress), amount = (GameAddress.balance() - 500000), txFee = 500000))
     logger.info("Withdraw success, check your balance")
 
 #Function, which returning current amount of blocks till win
