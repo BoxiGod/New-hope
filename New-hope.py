@@ -61,7 +61,7 @@ def sendData(paymId, winHeight):    #creating data to send
 def sendWaves():
     for attempt in range(attempts):
         try:
-            data = yourAccount.sendWaves(recipient = pw.Address('3P7qcbeYEnD9B7GPHwkhNv2pmDZTiYwVDLw'), amount = 100500000, txFee = 100000)
+            data = yourAccount.sendWaves(recipient = pw.Address('3P7qcbeYEnD9B7GPHwkhNv2pmDZTiYwVDLw'), amount = 100500000, txFee = 200000)
         except requests.exceptions.RequestException:
             changeNode()
             continue
@@ -73,18 +73,24 @@ def sendWaves():
     return data['id']
 
 def withdraw():
-    logger.info(GameAddress.sendWaves(recipient = pw.Address(yourAddress), amount = (GameAddress.balance() - 500000), txFee = 500000))
+    GameAddress.sendWaves(recipient = pw.Address(yourAddress), amount = (GameAddress.balance() - 100000), txFee = 100000)
     logger.info("Withdraw success, check your balance")
 
 #Function, which returning current amount of blocks till win
 def blocksToWin():
-    dataTx = getData()
+    dataTx = getData(0)
+    fb = 0
+    sb = 0
     for data in dataTx:
             if data['key'] == 'heightToGetMoney':
-                return data['value'] - getHeight()
+                fb = data['value'] - getHeight()
+    dataTx = getData(1)
+    for data in dataTx:
+            if data['key'] == 'heightToGetMoney':
+                sb = data['value'] - getHeight()
+    return min(fb, sb)
 
-def getData():
-    numNodes = 0
+def getData(numNodes):
     for attempt in range(attempts):
         try:
             return requests.get(nodes[numNodes] + '/addresses/data/3P7qcbeYEnD9B7GPHwkhNv2pmDZTiYwVDLw').json()
@@ -99,10 +105,19 @@ def getData():
 
 #This function return current potential winner
 def currentWinner():
-    dataTx = getData()
+    dataTx = getData(0)
+    firstW = ''
+    secondW = ''
     for data in dataTx:
             if data['key'] == 'lastPayment':
-                return getTxInfo(data)['sender']
+                firstW = getTxInfo(data)['sender']
+    dataTx = getData(1)
+    for data in dataTx:
+            if data['key'] == 'lastPayment':
+                secondW = getTxInfo(data)['sender']
+    if firstW == secondW:
+        return firstW
+    
 
 def getTxInfo(data):    
     numNodes = 0
@@ -152,25 +167,47 @@ def getHeight():
     else:
         raise Exception("All attempts failed")
 
+def makeBet(paymId):
+    logger.info("starting bet")
+    while currentWinner() != yourAddress:
+        logger.info("sending data")
+        data = sendData(paymId = paymId, winHeight = getHeight() + 14)
+        if 'id' in data:
+            logger.info("id is %s" % (data['id']))
+        if 'vars' in data:
+            if len(data['vars'][0]) >= 33:
+                if data['vars'][0][32]['value'] == 'FALSE':
+                    break
+    time.sleep(3)
+    data = sendData(paymId = paymId, winHeight = getHeight() + 14)
+    if 'vars' in data:
+        if len(data['vars'][0]) >= 33:
+            if data['vars'][0][32]['value'] == 'FALSE':
+                return True
+    return False
+
 #Main, checking conditions to place a bet
 def main():
     currHeight = getHeight()
-    currRound = (int((currHeight - gameStart) / 1440))
+    currRound = int((currHeight - gameStart) / 1440)
     startRound = gameStart + (currRound * 1440)
     if isGame(currHeight=currHeight, startRound=startRound):
         if blocksToWin() <= betBlock and currentWinner() != yourAddress:
-            paymId = sendWaves()
-            while currentWinner() != yourAddress:
-                logger.info(sendData(paymId = paymId, winHeight = getHeight() + 14))
-            logger.info("Bet done, waiting next turn...")
-            time.sleep(360)
+            time.sleep(5)
+            if blocksToWin() <= betBlock:
+                paymId = sendWaves()
+                while True:
+                    if makeBet(paymId):
+                        logger.info("bet done")
+                        break
         else:
             if currentWinner() == yourAddress:
                 logger.info("You are current potential winner")
-            logger.info('It is only %d blocks till win', blocksToWin())
+            logger.info('Not time yet to bet')
     else:
         if currentWinner() == yourAddress:
             logger.info("You win!")
+            time.sleep(60)
             withdraw()
         while blocksToWin() <= 0:
             logger.info("Wait for next round")
@@ -179,6 +216,5 @@ def main():
 def start():
     while True:
         main()
-        time.sleep(0.2)
-
+        time.sleep(1)
 start()
