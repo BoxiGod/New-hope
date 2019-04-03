@@ -168,9 +168,7 @@ def getHeight():
         raise Exception("All attempts failed")
 
 def makeBet(paymId):
-    logger.info("starting bet")
     while currentWinner() != yourAddress:
-        logger.info("sending data")
         data = sendData(paymId = paymId, winHeight = getHeight() + 14)
         if 'id' in data:
             logger.info("id is %s" % (data['id']))
