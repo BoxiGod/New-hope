@@ -24,9 +24,10 @@ yourPrivateKey = ''
 yourAddress = ''
 betBlock = 2 #choose blocks till end when make a bet
 nodes = ['http://localhost:6869', 'https://nodes.wavesnodes.com', 'https://api.vienna-node.eu', 'http://173.212.243.216:6869', 'http://138.197.155.74:6869']
-GameAddress = pw.Address(privateKey = 'YnuT613AHFzSX7FQQQEDpa1xy6TYjMaxbuvVKgN87n4')
+GameAddress = pw.Address(privateKey = '6RLA4Pnj1xNgRCH3qUYjzkxuppPGLQ7gt3dgotj9wqjg')
 yourAccount = pw.Address(privateKey = yourPrivateKey)
 attempts = 10 * len(nodes)
+paymId = ''
 
 def sendData(paymId, winHeight):    #creating data to send
     data = [
@@ -61,7 +62,7 @@ def sendData(paymId, winHeight):    #creating data to send
 def sendWaves():
     for attempt in range(attempts):
         try:
-            data = yourAccount.sendWaves(recipient = pw.Address('3P7qcbeYEnD9B7GPHwkhNv2pmDZTiYwVDLw'), amount = 100500000, txFee = 200000)
+            data = yourAccount.sendWaves(recipient = pw.Address('3P22HSYExcKjPSLSK8ZEdysZwmWN42PDUfU'), amount = 100500000, txFee = 100000)
         except requests.exceptions.RequestException:
             changeNode()
             continue
@@ -73,7 +74,7 @@ def sendWaves():
     return data['id']
 
 def withdraw():
-    GameAddress.sendWaves(recipient = pw.Address(yourAddress), amount = (GameAddress.balance() - 100000), txFee = 100000)
+    GameAddress.sendWaves(recipient = pw.Address(yourAddress), amount = (GameAddress.balance() - 500000), txFee = 500000)
     logger.info("Withdraw success, check your balance")
 
 #Function, which returning current amount of blocks till win
@@ -93,7 +94,7 @@ def blocksToWin():
 def getData(numNodes):
     for attempt in range(attempts):
         try:
-            return requests.get(nodes[numNodes] + '/addresses/data/3P7qcbeYEnD9B7GPHwkhNv2pmDZTiYwVDLw').json()
+            return requests.get(nodes[numNodes] + '/addresses/data/3P22HSYExcKjPSLSK8ZEdysZwmWN42PDUfU').json()
         except requests.exceptions.RequestException:
             logger.warning("Problem with %s, going to try next one node", nodes[numNodes])
             numNodes = (numNodes + 1) % (len(nodes) - 1)
@@ -167,9 +168,10 @@ def getHeight():
     else:
         raise Exception("All attempts failed")
 
-def makeBet(paymId):
+def makeBet():
+    global paymId
     while currentWinner() != yourAddress:
-        data = sendData(paymId = paymId, winHeight = getHeight() + 14)
+        data = sendData(paymId = paymId, winHeight = getHeight() + 16)
         if 'id' in data:
             logger.info("id is %s" % (data['id']))
         if 'vars' in data:
@@ -177,10 +179,11 @@ def makeBet(paymId):
                 if data['vars'][0][32]['value'] == 'FALSE':
                     break
     time.sleep(3)
-    data = sendData(paymId = paymId, winHeight = getHeight() + 14)
+    data = sendData(paymId = paymId, winHeight = getHeight() + 16)
     if 'vars' in data:
         if len(data['vars'][0]) >= 33:
             if data['vars'][0][32]['value'] == 'FALSE':
+                paymId = sendWaves()
                 return True
     return False
 
@@ -191,17 +194,15 @@ def main():
     startRound = gameStart + (currRound * 1440)
     if isGame(currHeight=currHeight, startRound=startRound):
         if blocksToWin() <= betBlock and currentWinner() != yourAddress:
-            time.sleep(5)
             if blocksToWin() <= betBlock:
-                paymId = sendWaves()
                 while True:
-                    if makeBet(paymId):
+                    if makeBet():
                         logger.info("bet done")
                         break
         else:
             if currentWinner() == yourAddress:
                 logger.info("You are current potential winner")
-            logger.info('Not time yet to bet')
+            logger.info('Not time yet to bet, last id = %s', paymId)
     else:
         if currentWinner() == yourAddress:
             logger.info("You win!")
@@ -212,7 +213,9 @@ def main():
             time.sleep(1)
 
 def start():
+    global paymId
+    paymId = sendWaves()
     while True:
         main()
-        time.sleep(1)
+        time.sleep(0.05)
 start()
