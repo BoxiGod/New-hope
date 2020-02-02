@@ -172,7 +172,7 @@ def main():
             logger.info("You win!")
             withdraw = PlayingAccount.invokeScript('3PDtyStFHhEF5LSqPi4amUUAW6KQQQhNaR7', 'withdraw', params = [{"type": "integer", "value": previousRound+1}], payments = [])
             logger.info(withdraw)
-            time.sleep(120)
+            time.sleep(1200)
         previousRound = previousRound + 1
         start()
 
