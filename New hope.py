@@ -26,7 +26,6 @@ numNodes = 0
 previousRound = 58
 PlayingAccount = pw.Address(privateKey = '')
 yourAddress = ''
-yourAddress2 = ''
 rush = 0
 
 
@@ -93,8 +92,6 @@ def getData(numNodes):
 
 
 def blocksToWin():
-    global numNodes
-    logger.info("NumNodes: %s", str(numNodes))
     return int(getData(numNodes)['value'][0:7])-int(getHeight())
 
 
@@ -151,22 +148,22 @@ def main():
                     logger.info("bet done")
                     time.sleep(180)
                     break
-        if blocksTillWin <= betBlock and curWin != yourAddress and curWin != yourAddress2:
+        if blocksTillWin <= betBlock and curWin != yourAddress:
             time.sleep(5)
             curWin = currentWinner()
             blocksTillWin = blocksToWin()
-            if blocksTillWin <= betBlock and curWin != yourAddress and curWin != yourAddress2:
+            if blocksTillWin <= betBlock and curWin != yourAddress:
                 while True:
                     if makeBet():
                         logger.info("bet done")
                         time.sleep(180)
                         break
             else:
-                if curWin == yourAddress or curWin == yourAddress2:
+                if curWin == yourAddress:
                     logger.info("You are current potential winner")
                 logger.info('Not time yet to bet, blocks till win: %s', str(blocksTillWin))
         else:
-            if curWin == yourAddress or curWin == yourAddress2:
+            if curWin == yourAddress:
                 logger.info("You are current potential winner")
             logger.info('Not time yet to bet, blocks till win: %s', str(blocksTillWin))
     else:
